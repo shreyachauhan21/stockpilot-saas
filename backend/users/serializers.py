@@ -29,3 +29,21 @@ class RegisterSerializer(serializers.Serializer):
             )
 
             return user
+
+
+
+class UserSerializer(serializers.ModelSerializer):
+    organization = serializers.CharField(
+        source="organization.name",
+        read_only=True
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "email",
+            "role",
+            "organization",
+        ]
