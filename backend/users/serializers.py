@@ -47,3 +47,29 @@ class UserSerializer(serializers.ModelSerializer):
             "role",
             "organization",
         ]
+
+
+class CreateUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password", "role"]
+
+    def validate_role(self, value):
+        if value == User.Role.ADMIN:
+            raise serializers.ValidationError("Cannot create another admin.")
+        return value
+
+    def create(self, validated_data):
+        request = self.context["request"]
+
+        user = User.objects.create_user(
+            username=validated_data["username"],
+            email=validated_data["email"],
+            password=validated_data["password"],
+            role=validated_data["role"],
+            organization=request.user.organization,  # IMPORTANT
+        )
+
+        return user
